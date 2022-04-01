@@ -5,6 +5,7 @@ from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
 from std_msgs.msg import Int32
 from scipy.spatial import KDTree
+import numpy as np
 
 import math
 
@@ -56,10 +57,19 @@ class WaypointUpdater(object):
             rospy.sleep()
 
     def get_closest_waypoint_id(self):
+        # Explanation of the math is in https://youtu.be/6GIFyUzhaQo?t=582
         x = self.pose.pose.position.x 
         y = self.pose.pose.position.y
         closest_idx = self.waypoint_tree.query([x, y])[1]
-        # TODO: complete from https://youtu.be/6GIFyUzhaQo?t=453
+        closest_coord = self.waypoints_2d[closest_idx]
+        prev_coord = self.waypoints_2d[closest_idx - 1]
+        cl_vect = np.array(closest_coord)
+        prev_vect = np.array(prev_coord)
+        pos_vect = np.array([x, y])
+        val = np.dot(cl_vect - prev_vect , pos_vect - cl_vect)
+        if val > 0:
+            closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
+        return closest_idx
 
 
     def pose_cb(self, msg):
