@@ -54,7 +54,7 @@ class WaypointUpdater(object):
             if self.pose and self.base_waypoints:
                 closest_waypoint_idx = self.get_closest_waypoint_id()
                 self.publish_waypoints(closest_waypoint_idx)
-            rospy.sleep()
+            rate.sleep()
 
     def get_closest_waypoint_id(self):
         # Explanation of the math is in https://youtu.be/6GIFyUzhaQo?t=582
@@ -70,6 +70,12 @@ class WaypointUpdater(object):
         if val > 0:
             closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
         return closest_idx
+    
+    def publish_waypoints(self, closest_idx):
+        lane = Lane()
+        lane.header = self.base_waypoints.header
+        lane.waypoints = self.base_waypoints.waypoints[closest_idx : closest_idx + LOOKAHEAD_WPS]
+        self.final_waypoints_pub.publish(lane)
 
 
     def pose_cb(self, msg):
@@ -82,6 +88,7 @@ class WaypointUpdater(object):
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
         # TODO: Implement
+        self.loop()
 
         pass
 
