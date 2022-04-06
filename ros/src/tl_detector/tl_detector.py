@@ -102,7 +102,7 @@ class TLDetector(object):
 
         """
         #TODO implement
-        closest_idx = self.waypoint_tree.query([x, y], 1)[1]
+        closest_idx = self.waypoint_tree.query([x, y], 1)[1] # TODO: get the correct code for KDTree
         return closest_idx
 
     def get_light_state(self, light):
