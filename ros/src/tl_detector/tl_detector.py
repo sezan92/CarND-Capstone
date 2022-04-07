@@ -10,6 +10,7 @@ from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
 import yaml
+from scipy.spatial import KDTree
 
 STATE_COUNT_THRESHOLD = 3
 CLASSIFY = False
@@ -56,10 +57,17 @@ class TLDetector(object):
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
+        print('DEBUG TLDetector got waypoints')
+        self.base_waypoints = waypoints
+
+        if not self.waypoints_2d:
+            self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
+            self.waypoint_tree = KDTree(self.waypoints_2d)
         self.waypoints = waypoints
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
+        self.publish_traffic_light()
 
     def image_cb(self, msg):
         """Identifies red lights in the incoming camera image and publishes the index
@@ -71,6 +79,9 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
+        self.publish_traffic_light()
+    
+    def publish_traffic_light(self):
         light_wp, state = self.process_traffic_lights()
 
         '''
