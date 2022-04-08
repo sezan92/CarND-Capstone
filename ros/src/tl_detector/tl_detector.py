@@ -21,6 +21,8 @@ class TLDetector(object):
 
         self.pose = None
         self.waypoints = None
+        self.waypoint_tree = None
+        self.waypoints_2d = None
         self.camera_image = None
         self.lights = []
 
@@ -52,7 +54,6 @@ class TLDetector(object):
         self.state_count = 0
 
         rospy.spin()
-
     def pose_cb(self, msg):
         self.pose = msg
 
@@ -61,8 +62,10 @@ class TLDetector(object):
         self.base_waypoints = waypoints
 
         if not self.waypoints_2d:
+            print('DEBUG: waypoints_tree loading')
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
+            print('DEBUG: waypoint_tree {}'.format(self.waypoint_tree))
         self.waypoints = waypoints
 
     def traffic_cb(self, msg):
@@ -90,6 +93,7 @@ class TLDetector(object):
         of times till we start using it. Otherwise the previous stable state is
         used.
         '''
+        
         if self.state != state:
             self.state_count = 0
             self.state = state
@@ -113,6 +117,7 @@ class TLDetector(object):
 
         """
         #TODO implement
+
         closest_idx = self.waypoint_tree.query([x, y], 1)[1] # TODO: get the correct code for KDTree
         return closest_idx
 
