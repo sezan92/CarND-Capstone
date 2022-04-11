@@ -21,7 +21,6 @@ class TLDetector(object):
 
         self.pose = None
         self.waypoints = None
-        self.waypoint_tree = None
         self.waypoints_2d = None
         self.camera_image = None
         self.lights = []
@@ -62,10 +61,10 @@ class TLDetector(object):
         self.base_waypoints = waypoints
 
         if not self.waypoints_2d:
-            print('DEBUG: waypoints_tree loading')
+            # print('DEBUG: waypoints_tree loading')
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
-            print('DEBUG: waypoint_tree {}'.format(self.waypoint_tree))
+            # print('DEBUG: waypoint_tree {}'.format(self.waypoint_tree))
         self.waypoints = waypoints
 
     def traffic_cb(self, msg):
@@ -98,11 +97,14 @@ class TLDetector(object):
             self.state_count = 0
             self.state = state
         elif self.state_count >= STATE_COUNT_THRESHOLD:
+            # print('DEBUG: self.state_count {}'.format(self.state_count))
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
+            # print('DEBUG: light_wp: {}'.format(light_wp))
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
+            # print('DEBUG: state_count less than threshold')
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
@@ -117,10 +119,12 @@ class TLDetector(object):
 
         """
         #TODO implement
-
-        closest_idx = self.waypoint_tree.query([x, y], 1)[1] # TODO: get the correct code for KDTree
-        return closest_idx
-
+        try:
+            closest_idx = self.waypoint_tree.query([x, y], 1)[1] # TODO: get the correct code for KDTree
+            return closest_idx
+        except AttributeError:
+            pass
+            # print('DEBUG: waypoint_tree: {}'.format(self.waypoint_tree))
     def get_light_state(self, light):
         """Determines the current color of the traffic light
 
