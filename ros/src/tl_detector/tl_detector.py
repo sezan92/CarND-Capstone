@@ -21,6 +21,7 @@ class TLDetector(object):
 
         self.pose = None
         self.waypoints = None
+        self.waypoint_tree = None
         self.waypoints_2d = None
         self.camera_image = None
         self.lights = []
@@ -119,12 +120,11 @@ class TLDetector(object):
 
         """
         #TODO implement
-        try:
-            closest_idx = self.waypoint_tree.query([x, y], 1)[1] # TODO: get the correct code for KDTree
-            return closest_idx
-        except AttributeError:
-            pass
-            # print('DEBUG: waypoint_tree: {}'.format(self.waypoint_tree))
+        while not self.waypoint_tree:
+            pass 
+    
+        closest_idx = self.waypoint_tree.query([x, y], 1)[1] # TODO: get the correct code for KDTree
+        return closest_idx
     def get_light_state(self, light):
         """Determines the current color of the traffic light
 
@@ -165,6 +165,9 @@ class TLDetector(object):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
             #TODO find the closest visible traffic light (if one exists)
+            while not self.waypoints:
+                # Wait till getting self.waypoints
+                pass
             diff = len(self.waypoints.waypoints)
             for i, light in enumerate(self.lights):
                 line = stop_line_positions[i]

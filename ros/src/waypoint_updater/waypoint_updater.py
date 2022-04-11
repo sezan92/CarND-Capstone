@@ -118,7 +118,7 @@ class WaypointUpdater(object):
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
         self.stopline_wp_idx = msg.data
-        print('DEBUG: Got traffic light message {}'.format(self.stopline_wp_idx))
+        print('INFO: Got traffic light message {}'.format(self.stopline_wp_idx))
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
